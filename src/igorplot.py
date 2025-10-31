@@ -33,9 +33,23 @@ markerDict: dict[str,int] = {
     '4': 58,   # tri_right (Igor only has tri_up)
     }
 
-def get_marker_from_type(marker: str) -> int:
+lineStyleDict: dict[str,int] = {
+    '-': 0,         # solid
+    'solid': 0,     # solid
+    '--': 3,        # dashed
+    'dashed': 3,    # dashed
+    '-.': 5,        # dash dot
+    'dashdot': 5,   # dash dot
+    ':': 1,         # dotted
+    'dotted': 1,    # dotted
+}
+
+def get_igor_marker(marker: str) -> int:
     return markerDict.get(marker, 19) # filled circle is a good default marker
-    
+
+def get_igor_linestyle(style: str) -> int:
+    return lineStyleDict.get(style, 0) # default to solid line
+
 def linePlot(axis : Axes) -> list[str]:
     """
     Generates a line plot in Igor Pro from an input matplotlib axis object.
@@ -82,6 +96,7 @@ def linePlot(axis : Axes) -> list[str]:
         igorpro.execute(f'Label bottom "{xLabel}"')
         igorpro.execute(f'Label left "{yLabel}"')
 
+        # Grid lines
         gridLines = axis.get_xgridlines()
         if gridLines and gridLines[0].get_visible():
             gridRGBA = colors.to_rgba(gridLines[0].get_color())
@@ -102,10 +117,8 @@ def linePlot(axis : Axes) -> list[str]:
 
         # Line style
         lineStyle = trace.get_linestyle()
-        if lineStyle == '-':
-            igorpro.execute(f'ModifyGraph mode({yWaveName}) = 0, lstyle({yWaveName}) = 0')
-        elif lineStyle == '--':
-            igorpro.execute(f'ModifyGraph mode({yWaveName}) = 0, lstyle({yWaveName}) = 3')
+        if lineStyle:
+            igorpro.execute(f'ModifyGraph mode({yWaveName}) = 0, lstyle({yWaveName}) = {get_igor_linestyle(str(lineStyle))}')
 
         # Sparse markers
         markerEvery = trace.get_markevery()
@@ -114,7 +127,7 @@ def linePlot(axis : Axes) -> list[str]:
 
         markerType = trace.get_marker()
         if markerType:
-            igorpro.execute(f'ModifyGraph marker({yWaveName}) = {get_marker_from_type(str(markerType))}')
+            igorpro.execute(f'ModifyGraph marker({yWaveName}) = {get_igor_marker(str(markerType))}')
 
         # Line color
         lineRGBA = colors.to_rgba(trace.get_color())
@@ -129,7 +142,10 @@ def linePlot(axis : Axes) -> list[str]:
    
 
 def convert(figure : matplotlib.figure.Figure):
-    
+    """
+    Converts a matplotlib Figure into an Igor graph
+    """
+
     igorpro.execute('Display')
 
     axes = figure.axes
@@ -137,7 +153,7 @@ def convert(figure : matplotlib.figure.Figure):
         if any(isinstance(line, lines.Line2D) for line in axis.get_lines()):
             waveNameList = linePlot(axis)
         else:
-            print(axis)
+            print('Axis type not implemented:', axis)
 
     # Legend
     legend = figure.legend()
