@@ -5,3 +5,30 @@ This project started from an Igor user's feature request: https://www.wavemetric
 
 Note, as this is an actively developed project, many of matplotlib's features may not yet be convertible to Igor graphs. We're starting with simple line plots and moving forward from there.
 
+# Details
+
+This project can only be run from inside Igor Pro, and you need an active Igor Pro 10 license.
+
+The project contains a helper Igor procedure file found in `ipf/openWorkspace.ipf`. You can run the function:
+
+```igor
+openWorkspace(String environmentName)
+```
+
+to automate the Python setup that needs to happen to run the conversion tool. It will create the named virtual environment in the project folder, activate it, and install the dependencies found in `requirements.txt`. If the environment already exists, it will just activate the environment and attempt to re-install the dependencies.
+
+After the virtual environment is running, you can execute:
+
+```igor
+PythonFile file = "src/igorplot.py"
+```
+
+which will run the example test plot conversion that is found in `src/testplot.py`.
+
+For normal usage, you would first generate your matplotlib figure, and then call
+
+```python
+igorplot.convert(figure)
+```
+
+to convert and display the equivalent graph in Igor.
