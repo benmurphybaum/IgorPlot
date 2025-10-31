@@ -5,7 +5,7 @@ import matplotlib.colors as colors
 import matplotlib.lines as lines
 from matplotlib.axes import Axes
 
-import testplot
+from src import testplot
 
 import igorpro
 
