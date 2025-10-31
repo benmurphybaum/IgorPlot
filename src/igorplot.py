@@ -7,6 +7,9 @@ from matplotlib.axes import Axes
 
 from src import testplot
 
+import importlib
+importlib.reload(testplot)
+
 import igorpro
 
 markerDict: dict[str,int] = {
